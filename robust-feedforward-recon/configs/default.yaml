@@ -1,0 +1,46 @@
+# Robust feed-forward depth and 3D reconstruction on dynamic scenes.
+# Snow is held out from training to test generalisation to an unseen condition.
+
+scene:
+  height: 64
+  width: 96
+  focal_scale: 0.8
+  camera_height: 1.5
+  max_depth: 60.0
+  n_frames: 5
+
+data:
+  cache_dir: data
+  n_train: 800
+  n_test: 150
+
+runs_dir: runs
+results_dir: results
+seeds: [0, 1]
+
+train:
+  epochs: 15
+  batch_size: 32
+  lr: 0.002
+  p_clean: 0.25
+
+train_corruptions: [fog, rain, low_light, shadows, occlusion]
+eval_conditions: [clean, fog, rain, snow, low_light, shadows, occlusion]
+eval_severity: 2
+severity_sweep: [fog, low_light, snow]
+
+variants:
+  single_clean:          # single image, clean training data
+    context: 0
+    augment: false
+  multi_clean:           # three-frame window, clean training data
+    context: 1
+    augment: false
+  multi_aug:             # three frames + corruption augmentation
+    context: 1
+    augment: true
+  robust:                # + photometric normalisation + clean/corrupted consistency loss
+    context: 1
+    augment: true
+    photometric_norm: true
+    consistency_weight: 0.5
